@@ -110,7 +110,7 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("isFalling", false);
             }
 
-            // Reset the roll attack trigger if the player lands
+            // Reset the roll attack trigger if the player lands.
             if (isGrounded && !wasGrounded)
             {
                 animator.ResetTrigger("isJumpingWithRollAttack");
