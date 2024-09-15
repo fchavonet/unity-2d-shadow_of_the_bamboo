@@ -787,6 +787,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   groundCheckRadius: 0.2
+  isAttacking: 0
+  isHeliSlamAttacking: 0
+  isRollAttacking: 0
 --- !u!1 &1944017041
 GameObject:
   m_ObjectHideFlags: 0

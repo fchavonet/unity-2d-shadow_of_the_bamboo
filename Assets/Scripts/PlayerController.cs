@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
+
     [Header("Components")]
     public Animator animator;
     public Rigidbody2D rigidbody2d;
@@ -17,15 +19,28 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.2f;
 
-    // Private variables
+    // Private variables.
     private PlayerInput playerInput;
     private Vector2 moveInput;
 
-    private bool isFacingRight = true;
     private bool isGrounded = false;
+    private bool canMove = true;
+    private bool isMoving = false;
+    private bool isFacingRight = true;
+
+    // Public variables, but hidden.
+    [HideInInspector]
+    public bool isAttacking = false;
+    [HideInInspector]
+    public bool isHeliSlamAttacking = false;
+    [HideInInspector]
+    public bool isRollAttacking = false;
 
     private void Awake()
     {
+        // Singleton pattern - Ensure only one instance of PlayerController exists.
+        instance = this;
+
         // Initialize the input system and bind actions.
         playerInput = new PlayerInput();
 
@@ -35,6 +50,11 @@ public class PlayerController : MonoBehaviour
 
         // Registering jump action.
         playerInput.Player.Jump.performed += OnJumpPerformed;
+
+        // Registering attack actions.
+        playerInput.Player.Attacks.performed += OnAttackPerformed;
+        playerInput.Player.HeliSlamAttack.performed += OnHeliSlamAttackPerformed;
+        playerInput.Player.RollAttack.performed += OnRollAttackPerformed;
     }
 
     // FixedUpdate is called every fixed framerate frame.
@@ -44,7 +64,10 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
         // Moving the player horizontally
-        rigidbody2d.velocity = new Vector2(moveInput.x * moveSpeed, rigidbody2d.velocity.y);
+        if (canMove)
+        {
+            rigidbody2d.velocity = new Vector2(moveInput.x * moveSpeed, rigidbody2d.velocity.y);
+        }
 
         // Flipping the player when changing direction.
         if (moveInput.x > 0 && !isFacingRight)
@@ -77,6 +100,7 @@ public class PlayerController : MonoBehaviour
     {
         // Read movement input as Vector2.
         moveInput = context.ReadValue<Vector2>();
+        isMoving = true;
     }
 
     // Called when movement input is canceled.
@@ -84,16 +108,43 @@ public class PlayerController : MonoBehaviour
     {
         // Reset movement input when the key is released.
         moveInput = Vector2.zero;
+        isMoving = false;
     }
 
     // Called when jump input is performed.
     private void OnJumpPerformed(InputAction.CallbackContext context)
     {
-        // Only jump if the player is grounded.
         if (isGrounded)
         {
             rigidbody2d.velocity = new Vector2(rigidbody2d.velocity.x, jumpForce);
             isGrounded = false;
+        }
+    }
+
+    // Called when attack input is performed.
+    private void OnAttackPerformed(InputAction.CallbackContext context)
+    {
+        if (isGrounded && !isAttacking)
+        {
+            isAttacking = true;
+        }
+    }
+
+    // Called when heli slam attack input is performed.
+    private void OnHeliSlamAttackPerformed(InputAction.CallbackContext contex)
+    {
+        if (isGrounded && !isMoving && !isHeliSlamAttacking)
+        {
+            isHeliSlamAttacking = true;
+        }
+    }
+
+    // Called when roll attack input is performed.
+    private void OnRollAttackPerformed(InputAction.CallbackContext context)
+    {
+        if (isGrounded && !isRollAttacking)
+        {
+            isRollAttacking = true;
         }
     }
 

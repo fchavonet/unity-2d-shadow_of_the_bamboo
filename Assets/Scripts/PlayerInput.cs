@@ -44,6 +44,33 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Attacks"",
+                    ""type"": ""Button"",
+                    ""id"": ""3a70da71-14c3-4636-a7c0-484f56d2db83"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HeliSlamAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""addf447e-1051-4654-bacd-dd22a60f0fb7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RollAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""c9afa561-443a-4d91-9fde-f7b2290dcf5f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -288,6 +315,72 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""333f043f-0049-421d-9102-9aafe42dcc13"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attacks"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8407b8a-6868-49f1-b852-345462e915dc"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attacks"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1c0d4327-6395-46b4-9647-128ef7a19ba4"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HeliSlamAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c0f42ddc-0308-40f7-b2ca-442ab8aebf26"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HeliSlamAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""13ad816d-4081-4279-836c-3fc26ce7d5ef"",
+                    ""path"": ""<Keyboard>/leftAlt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ed10dca5-0746-4f57-b459-a5f12f838c10"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RollAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -298,6 +391,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Attacks = m_Player.FindAction("Attacks", throwIfNotFound: true);
+        m_Player_HeliSlamAttack = m_Player.FindAction("HeliSlamAttack", throwIfNotFound: true);
+        m_Player_RollAttack = m_Player.FindAction("RollAttack", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -361,12 +457,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Attacks;
+    private readonly InputAction m_Player_HeliSlamAttack;
+    private readonly InputAction m_Player_RollAttack;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
         public PlayerActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Attacks => m_Wrapper.m_Player_Attacks;
+        public InputAction @HeliSlamAttack => m_Wrapper.m_Player_HeliSlamAttack;
+        public InputAction @RollAttack => m_Wrapper.m_Player_RollAttack;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -382,6 +484,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @Attacks.started += instance.OnAttacks;
+            @Attacks.performed += instance.OnAttacks;
+            @Attacks.canceled += instance.OnAttacks;
+            @HeliSlamAttack.started += instance.OnHeliSlamAttack;
+            @HeliSlamAttack.performed += instance.OnHeliSlamAttack;
+            @HeliSlamAttack.canceled += instance.OnHeliSlamAttack;
+            @RollAttack.started += instance.OnRollAttack;
+            @RollAttack.performed += instance.OnRollAttack;
+            @RollAttack.canceled += instance.OnRollAttack;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -392,6 +503,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @Attacks.started -= instance.OnAttacks;
+            @Attacks.performed -= instance.OnAttacks;
+            @Attacks.canceled -= instance.OnAttacks;
+            @HeliSlamAttack.started -= instance.OnHeliSlamAttack;
+            @HeliSlamAttack.performed -= instance.OnHeliSlamAttack;
+            @HeliSlamAttack.canceled -= instance.OnHeliSlamAttack;
+            @RollAttack.started -= instance.OnRollAttack;
+            @RollAttack.performed -= instance.OnRollAttack;
+            @RollAttack.canceled -= instance.OnRollAttack;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -413,5 +533,8 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnAttacks(InputAction.CallbackContext context);
+        void OnHeliSlamAttack(InputAction.CallbackContext context);
+        void OnRollAttack(InputAction.CallbackContext context);
     }
 }
