@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
 
     private bool isGrounded = false;
+    private bool wasGrounded = false;
     private bool canMove = true;
     private bool isMoving = false;
     private bool isFacingRight = true;
@@ -61,6 +62,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // Ground check using Physics2D to determine if the player is on the ground.
+        wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
         // Moving the player horizontally
@@ -80,7 +82,41 @@ public class PlayerController : MonoBehaviour
         }
 
         // Update player's animations.
-        UpdateAnimation();
+        if (animator != null)
+        {
+            // Update the "Speed" parameter in the animator based on the absolute value of the horizontal velocity.
+            animator.SetFloat("Speed", Mathf.Abs(rigidbody2d.velocity.x));
+
+            // If the player is in the air, handle jumping and falling animations.
+            if (!isGrounded)
+            {
+                // If the player is moving upwards, play the jumping animation.
+                if (rigidbody2d.velocity.y > 0)
+                {
+                    animator.SetBool("isJumping", true);
+                    animator.SetBool("isFalling", false);
+                }
+                // If the player is moving upwards, play the jumping animation.
+                else if (rigidbody2d.velocity.y < 0)
+                {
+                    animator.SetBool("isJumping", false);
+                    animator.SetBool("isFalling", true);
+                }
+            }
+            else
+            {
+                // If the player is grounded, reset both jumping and falling animations.
+                animator.SetBool("isJumping", false);
+                animator.SetBool("isFalling", false);
+            }
+
+            // Reset the roll attack trigger if the player lands
+            if (isGrounded && !wasGrounded)
+            {
+                animator.ResetTrigger("isJumpingWithRollAttack");
+                isRollAttacking = false;
+            }
+        }
     }
 
     // Called when the object becomes enabled and active.
@@ -146,6 +182,11 @@ public class PlayerController : MonoBehaviour
         {
             isRollAttacking = true;
         }
+
+        if (!isGrounded && !isRollAttacking)
+        {
+            animator.SetTrigger("isJumpingWithRollAttack");
+        }
     }
 
     // Flip the player's sprite and adjust position.
@@ -171,39 +212,6 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = newPosition;
-    }
-
-    // Update animator's speed parameter based on movement.
-    private void UpdateAnimation()
-    {
-        if (animator != null)
-        {
-            // Update the "Speed" parameter in the animator based on the absolute value of the horizontal velocity.
-            animator.SetFloat("Speed", Mathf.Abs(rigidbody2d.velocity.x));
-
-            // If the player is in the air, handle jumping and falling animations.
-            if (!isGrounded)
-            {
-                // If the player is moving upwards, play the jumping animation.
-                if (rigidbody2d.velocity.y > 0)
-                {
-                    animator.SetBool("isJumping", true);
-                    animator.SetBool("isFalling", false);
-                }
-                // If the player is moving upwards, play the jumping animation.
-                else if (rigidbody2d.velocity.y < 0)
-                {
-                    animator.SetBool("isJumping", false);
-                    animator.SetBool("isFalling", true);
-                }
-            }
-            else
-            {
-                // If the player is grounded, reset both jumping and falling animations.
-                animator.SetBool("isJumping", false);
-                animator.SetBool("isFalling", false);
-            }
-        }
     }
 
     // Visualize the ground check area in the editor.
